@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head th:include="frame/header :: commonHeader"></head>
+
+<body>
+<script type="text/javascript" th:inline="javascript">
+	var basePath = [[${#httpServletRequest.getContextPath()}]];
+    //保存
+    function importUser() {
+        if ($("#excel").val() == "" || document.getElementById("excel").files[0] == '请选择xls格式的文件') {
+
+            $("#excel").tips({
+                side: 3,
+                msg: '请选择文件',
+                bg: '#AE81FF',
+                time: 3
+            });
+            return false;
+        }
+
+      	//提示加载
+    	parent.layer.load(1, {time: 3*1000});
+        $("#uploadForm").ajaxSubmit({
+			url: basePath + "/user/uploadUser",
+			type:"post",
+			dataType:"json",
+			async:false,
+			success: function (res) {
+                layer.closeAll("loading");
+                if (res.code==200){
+                	//成功后，1.关闭弹窗，2.刷新页面，3.提示保存成功。
+        			parent.layer.closeAll();
+        			reloadCurrentIFrame();
+        			parent.layer.msg('操作成功！', {icon: 6, time: 2*1000});
+                }else {
+                	layer.closeAll("loading");
+                    layer.msg("系统错了小差，请稍后重试");
+                }
+            },
+            error: function () {
+                layer.closeAll("loading");
+                layer.msg("系统错了小差，请稍后重试");
+            }
+    	});
+    }
+
+    function fileType(obj) {
+        var fileType = obj.value.substr(obj.value.lastIndexOf(".")).toLowerCase();//获得文件后缀名
+        if (fileType != '.xls') {
+            $("#excel").tips({
+                side: 3,
+                msg: '请上传xls格式的文件',
+                bg: '#AE81FF',
+                time: 3
+            });
+            $("#excel").val('');
+            document.getElementById("excel").files[0] = '请选择xls格式的文件';
+        }
+    }
+
+    function closeWindow() {
+        parent.layer.closeAll();
+    }
+    
+    function downloadUser() {
+    	window.location.href = basePath + '/user/downUser';
+    }
+
+</script>
+<form name="uploadForm" id="uploadForm" method="post" enctype="multipart/form-data">
+    <table style="width:95%; margin-top: 15px;">
+    
+        <tr height="38px;">
+            <td><input type="file" id="excel" name="excel" onchange="fileType(this);" style="margin-left: 42px; width:210px"/></td>
+        </tr>
+        <tr>
+            <td style="text-align: center;">
+                <a class="layui-btn layui-btn-warm" onclick="importUser();">导入</a>
+                <a class="layui-btn layui-btn-primary" onclick="closeWindow();">取消</a>
+                <a class="layui-btn layui-btn-normal" onclick="downloadUser()">下载模版</a>
+            </td>
+        </tr>
+    </table>
+</form>
+
+</body>
+</html>

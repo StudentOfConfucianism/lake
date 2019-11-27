@@ -1,0 +1,290 @@
+
+<!DOCTYPE html>
+<html lang="en" style="height:100%;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+	content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title th:text="${title}">Java管理系统</title>
+<link rel="icon" th:href="@{/static/img/favicon.ico}">
+<link rel="stylesheet" th:href="@{/static/plugin/layui/css/layui.css}">
+</head>
+<body class="layui-layout-body" style="height:100%;">
+	<div class="layui-layout layui-layout-admin" style="height:100%;">
+	
+		<!-- 顶部区域 -->
+		<div class="layui-header">
+			<div class="layui-logo">Java业务管理平台</div>
+			<ul class="layui-nav layui-layout-right">
+				<li class="layui-nav-item">
+				    <a href="javascript:;"><img th:src="@{/static/img/default.png}" class="layui-nav-img"><span th:text="${session.user.username}"></span></a>
+				    <dl class="layui-nav-child">
+				      <dd><a href="javascript:;" onclick="openPasswordPage();">修改密码</a></dd>
+				      <dd><a th:href="@{/admin/logout}">安全退出</a></dd>
+				    </dl>
+				  </li>
+			</ul>
+		</div>
+		
+		<!-- 左侧垂直导航区域-->
+		<div class="layui-side layui-bg-black">
+			<div class="layui-side-scroll">
+				<span th:utext="${permTree}"></span>
+			</div>
+		</div>
+		
+		<!-- 内容区固定折叠左侧 -->
+		<span style="width: 15px; top: 81px; left: 14%; z-index: 1000; position:absolute; cursor: pointer;transform:rotate(180deg)" 
+			 onmouseover="style.backgroundColor='rgb(95,184,120)';style.color='white'" onmouseout="style.backgroundColor='white';" title="收起左侧">
+            <i class="layui-icon layui-icon-triangle-r" style="color: grey;" id="hideLeft" onmouseover="style.color='white'" onmouseout="style.color='grey'"></i>
+        </span>
+		<span style="width: 15px; top: 21px; left: 16px; z-index: 1000; position:absolute; cursor: pointer;"
+		 	onmouseover="style.backgroundColor='rgb(95,184,120)';" onmouseout="style.backgroundColor='white';" title="展开左侧">
+			<i class="layui-icon layui-icon-triangle-r" style="display: none; color: grey;" id="showLeft" onmouseover="style.color='white'" onmouseout="style.color='grey'"></i>
+        </span>
+	        
+		<!--内容区-->
+		<div class="layui-tab" id="mainContent" lay-filter="demo" lay-allowclose="true" style="height:100%; width:87%; margin-left: 13%;">
+			<!--内容区头部Tab标签-->
+			<ul class="layui-tab-title">
+				<!-- 内容区固定首页 -->
+			    <li class="layui-this" lay-id="111" style="margin-left:9px;"><i class="layui-icon">&#xe68e;</i><cite>首页</cite><p class="layui-tab-close" style="display: none;"></p></li>
+			</ul>
+			<!--内容区头部Tab右键菜单-->
+			<ul class="rightmenu" style="width: 112px; top: 27px; left: 262px; z-index: 1000; position:absolute; display: none; background-color: white; border: solid 1px rgb(242,242,242)">
+	            <li data-type="closethis" onmouseover="style.backgroundColor='rgb(95,184,120)';style.color='white'" onmouseout="style.backgroundColor='white';style.color='black'" ><span style="margin-left: 6px;">&nbsp;</span><i class="layui-icon layui-icon-close"></i>关闭当前</li>
+	            <li data-type="closeother" onmouseover="style.backgroundColor='rgb(95,184,120)';style.color='white'" onmouseout="style.backgroundColor='white';style.color='black'" ><span style="margin-left: 6px;">&nbsp;</span><i class="layui-icon layui-icon-close"></i>关闭其它</li>
+	            <li data-type="closeall" onmouseover="style.backgroundColor='rgb(95,184,120)';style.color='white'" onmouseout="style.backgroundColor='white';style.color='black'" ><span style="margin-left: 6px;">&nbsp;<i class="layui-icon layui-icon-close"></i></span>关闭所有</li>
+	        </ul>
+	        
+	        <!--内容区具体内容-->
+			<div class="layui-tab-content">
+				<div class="layui-tab-item layui-show" lay-id="1">
+                    <iframe id='indexIframe' th:src="@{/admin/home/page}" scrolling="auto" style="width:100%;height:555px;" frameborder="0" ></iframe>
+                </div>
+			</div>
+		</div>
+
+		<!-- 底部固定区域 -->
+		<div class="layui-footer" style="text-align: center;">
+			© java小兵 测试管理平台
+		</div>
+	</div>
+	<script th:src="@{/static/plugin/layui/layui.js}"></script>
+	<script>
+	var layer, $;
+    layui.use(['element', 'layer', 'jquery'], function () {
+        var element = layui.element;
+        layer = layui.layer;
+        $ = layui.$;
+        // 配置tab实践在下面无法获取到菜单元素
+        $('.site-demo-active').on('click', function () {
+            var dataid = $(this);
+            //这时会判断右侧.layui-tab-title属性下的有lay-id属性的li的数目，即已经打开的tab项数目
+            if ($(".layui-tab-title li[lay-id]").length <= 0) {
+                //如果比零小，则直接打开新的tab项
+                active.tabAdd(dataid.attr("data-url"), dataid.attr("data-id"), dataid.attr("data-title"));
+            } else {
+                //否则判断该tab项是否以及存在
+                var isData = false; //初始化一个标志，为false说明未打开该tab项 为true则说明已有
+                $.each($(".layui-tab-title li[lay-id]"), function () {
+                    //如果点击左侧菜单栏所传入的id 在右侧tab项中的lay-id属性可以找到，则说明该tab项已经打开
+                    if ($(this).attr("lay-id") == dataid.attr("data-id")) {
+                        isData = true;
+                    }
+                })
+                if (isData == false) {
+                    //标志为false 新增一个tab项
+                    active.tabAdd(dataid.attr("data-url"), dataid.attr("data-id"), dataid.attr("data-title"));
+                }
+            }
+            //最后不管是否新增tab，最后都转到要打开的选项页面上
+            active.tabChange(dataid.attr("data-id"));
+        });
+        
+        //左侧标签：鼠标移入时字体变大，移出时恢复
+        $('.site-demo-active').on("mouseover mouseout",function(event){
+	       	 if(event.type == "mouseover"){
+	       	  $(this).css('font-size',17);
+	       	 }else if(event.type == "mouseout"){
+	       		 $(this).css('font-size',14);
+	       	 }
+       	})
+
+       	//点击或切换到tab页，刷新该iframe
+       	element.on('tab(demo)', function(data){
+            $(".layui-show").children()[0].contentWindow.location.reload(true);
+		});
+
+        
+        var active = {
+            //在这里给active绑定几项事件，后面可通过active调用这些事件
+            tabAdd: function (url, id, name) {
+                //新增一个Tab项 传入三个参数，分别对应其标题，tab页面的地址，还有一个规定的id，是标签中data-id的属性值
+                //关于tabAdd的方法所传入的参数可看layui的开发文档中基础方法部分
+                element.tabAdd('demo', {
+                    title: name,
+                    content: '<iframe data-frameid="' + id + '" scrolling="auto" frameborder="0" src="' + url + '" style="width:99%;height:99%;"></iframe>',
+                    id: id //规定好的id
+                })
+                CustomRightClick(id);//绑定右键菜单
+                FrameWH();  //计算ifram层的大小
+            },
+            tabChange: function (id) {
+                //切换到指定Tab项
+                element.tabChange('demo', id); //根据传入的id传入到指定的tab项
+                //切换后，并使该iframe刷新
+                $(".layui-show").children()[0].contentWindow.location.reload(true);
+                
+            },
+            tabDelete: function (id) {
+                element.tabDelete("demo", id);//删除
+            }, 
+            tabDeleteOther: function (id, ids) {
+                $.each(ids, function (i,item) {
+                	//首页不能删
+                	if(item != 111 && item != id){
+	                    element.tabDelete("demo", item);
+                	}
+                })
+            }, 
+            tabDeleteAll: function (ids) {//删除所有
+                $.each(ids, function (i,item) {
+                	//首页不能删
+                	if(item != 111){
+	                    element.tabDelete("demo", item);
+                	}
+                })
+            }
+        };
+        
+        function FrameWH() {
+            var h = $(window).height();
+            $("iframe").css("height",(h-149)+"px");
+            $(".layui-tab-content").css("height",(h-149)+"px");
+        }
+        
+		//绑定右键菜单
+		function CustomRightClick(id) {
+	        //取消右键 
+	        $('.layui-tab-title,.layui-tab-title li').click(function () {
+	            $('.rightmenu').hide();
+	        });
+	        
+	        //桌面点击右击 
+	        $('.layui-tab-title li').on('contextmenu', function (e) {
+	            var popupmenu = $(".rightmenu");
+	            var target = $(e.target);
+	            popupmenu.find("li").attr("lay-id",target.attr("lay-id"));
+	            leftPos = target.offset().left;
+	            topPos = target.offset().top + target.height();
+	            popupmenu.css({ left: leftPos, top: topPos }).show();
+	            //点击空白处，设置弹框消失。此处仍有问题，点击iframe无法进入方法。
+	            var flag = true;
+	            $(document).bind("click",function(e){
+	              if(target.closest(popupmenu).length == 0 && flag == true){
+	              	$('.rightmenu').hide();
+	              	flag = false;
+	              }
+	            });
+	            return false;
+	        });
+        }
+      
+		//选择关闭当前或关闭其它或关闭所有
+		$(".rightmenu li").click(function () {
+		    if ($(this).attr("data-type") == "closethis") {
+		        active.tabDelete($(this).attr("lay-id"));
+		    } else if ($(this).attr("data-type") == "closeother") {
+		        var tabtitle = $(".layui-tab-title li");
+		        var ids = new Array();
+		        $.each(tabtitle, function (i) {
+		            ids[i] = $(this).attr("lay-id");
+		        })
+		        active.tabDeleteOther($(this).attr("lay-id"), ids);
+		    } else if ($(this).attr("data-type") == "closeall") {
+		        var tabtitle = $(".layui-tab-title li");
+		        var ids = new Array();
+		        $.each(tabtitle, function (i) {
+		            ids[i] = $(this).attr("lay-id");
+		        })
+		
+		        active.tabDeleteAll(ids);
+		    }
+		
+		    $('.rightmenu').hide();
+		})
+		
+		$('#hideLeft').click(function(){
+			$('.layui-side.layui-bg-black').hide();
+			$('#mainContent').css('margin-left', '0px');
+			$('#mainContent').css('width', '100%');
+			$('#hideLeft').css('display', 'none');
+			$('#showLeft').css('display', 'block');
+			$('.layui-header').css('display', 'none')
+			$('.layui-footer').css('display', 'none');
+            $("iframe").css("height",($(window).height()-60)+"px");
+		});
+		
+		$('#showLeft').click(function(){
+			$('.layui-side.layui-bg-black').show();
+			$('#mainContent').css('margin-left', '13%');
+			$('#mainContent').css('width', '87%');
+			$('#hideLeft').css('display', 'block');
+			$('#showLeft').css('display', 'none');
+			$('.layui-header').css('display', 'block')
+			$('.layui-footer').css('display', 'block')
+            $("iframe").css("height",($(window).height()-149)+"px");
+		});
+		
+    });
+    
+    function openPasswordPage(){
+		var content = '<div class="layui-form"><br>'
+					+ '<div class="layui-form-item"><label class="layui-form-label"><span style="color: red"> * </span>原始密码:</label>'
+					+ '<div class="layui-input-inline"> <input type="password" id="oldPass" class="layui-input" placeholder="请输入原始密码" autocomplete="off"></div></div>'
+					+ '<div class="layui-form-item"><label class="layui-form-label"><span style="color: red"> * </span>新密码:</label>'
+					+ '<div class="layui-input-inline"> <input type="password" id="newPass" class="layui-input" placeholder="请输入新密码" autocomplete="off"></div></div>'
+					+ '<div class="layui-form-item"><label class="layui-form-label"><span style="color: red"> * </span>确认新密码:</label>'
+					+ '<div class="layui-input-inline"> <input type="password" id="surePass" class="layui-input" placeholder="请确认新密码" autocomplete="off"></div></div>'
+					+ '<div class="layui-form-item" style="text-align:center"><button type="button" class="layui-btn" onclick="modifyPassword();">确认修改</button>'
+					+ '<button type="button" class="layui-btn layui-btn-primary" onclick="layer.closeAll();">取消</button></div></div>';
+			layer.open({
+				type : 1,
+				title : '修改密码',
+				shadeClose : false,
+				maxmin : false,
+				skin : 'layer-ext-moon',
+				shade : 0.2,
+				area : [ '350px', '280px' ],
+				content : content
+			})
+	}
+    
+    function modifyPassword(){
+    	//其他校验略，如：长度为8-16个字符,不能使用空格、中文,至少含数字/字母/字符2种组合,不能含有非法字符等
+    	if($('#oldPass').val().trim()==''){$('#oldPass').focus();layer.msg('请输入原始密码', {icon:5}); return}
+    	else if($('#newPass').val().trim()==''){$('#newPass').focus();layer.msg('请输入新密码', {icon:5}); return}
+    	else if($('#surePass').val().trim()==''){$('#surePass').focus();layer.msg('请确认新密码', {icon:5}); return}
+    	else if($('#newPass').val()!=$('#surePass').val()){$('#newPass').focus();layer.msg('两次输入的密码不一致，请重新输入', {icon:5}); return}
+    	var baseUrl = '[[${#httpServletRequest.getContextPath()}]]';
+    	$.ajax({
+            url: baseUrl + '/admin/modifyPassword',
+            type: "post",
+            dataType: "json",
+            data: {curPass:$('#oldPass').val(), newPass:$('#newPass').val(), surePass:$('#surePass').val()},
+            success: function (res) {
+            	res.code == 200
+            	  ?layer.alert("密码修改成功，请重新登录", function(){window.location=baseUrl + '/admin/logout'})
+            	  :layer.msg(res.message, {icon:5});
+            },
+    		error: function (res) {
+    			layer.msg('密码修改失败，请重试', {icon:5});
+            }
+     	})
+    }
+</script>
+</body>
+</html>
+
